@@ -1,0 +1,147 @@
+// datasource db defines the database connection settings.
+// It is configured for PostgreSQL and uses an environment variable for the connection URL.
+// The 'extensions' feature enables the use of PostgreSQL-specific data types.
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+}
+
+// generator db configures Prisma Client settings.
+// It is set up to use Prisma Client Python with asyncio interface and specific features.
+generator db {
+  provider             = "prisma-client-py"
+  interface            = "asyncio"
+  recursive_type_depth = 5
+  previewFeatures      = ["postgresqlExtensions"]
+}
+
+model User {
+  id             String                @id @default(uuid())
+  email          String                @unique
+  password       String
+  role           Role
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  ApiKeys        ApiKey[]
+  UserProfiles   UserProfile[]
+  Subscriptions  Subscription[]
+  RequestLogs    RequestLog[]
+  QrCodes        QrCode[]
+  ImageJobs      ImageProcessingJob[]
+  SpeechRequests TextToSpeechRequest[]
+}
+
+model ApiKey {
+  id            String          @id @default(uuid())
+  key           String          @unique
+  userId        String
+  user          User            @relation(fields: [userId], references: [id])
+  createdAt     DateTime        @default(now())
+  ServiceAccess ServiceAccess[]
+  RequestLogs   RequestLog[]
+}
+
+model UserProfile {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  firstName String?
+  lastName  String?
+  avatarUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Subscription {
+  id        String             @id @default(uuid())
+  userId    String
+  user      User               @relation(fields: [userId], references: [id])
+  startDate DateTime
+  endDate   DateTime
+  status    SubscriptionStatus
+}
+
+model RequestLog {
+  id           String        @id @default(uuid())
+  userId       String?
+  user         User?         @relation(fields: [userId], references: [id])
+  apiKeyId     String?
+  apiKey       ApiKey?       @relation(fields: [apiKeyId], references: [id])
+  serviceUsed  ServiceAccess
+  requestTime  DateTime      @default(now())
+  responseTime Int // Response time in milliseconds
+}
+
+model CurrencyRate {
+  id       String   @id @default(uuid())
+  currency String
+  rate     Float
+  date     DateTime @default(now())
+}
+
+model GeolocationData {
+  id        String   @id @default(uuid())
+  ipAddress String   @unique
+  country   String?
+  city      String?
+  latitude  Float?
+  longitude Float?
+  createdAt DateTime @default(now())
+}
+
+model QrCode {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  content   String
+  size      Int
+  encoding  String
+  createdAt DateTime @default(now())
+}
+
+model ImageProcessingJob {
+  id           String           @id @default(uuid())
+  userId       String
+  user         User             @relation(fields: [userId], references: [id])
+  originalUrl  String
+  processedUrl String?
+  action       ProcessingAction
+  createdAt    DateTime         @default(now())
+}
+
+model TextToSpeechRequest {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  text      String
+  language  String
+  audioUrl  String?
+  createdAt DateTime @default(now())
+}
+
+enum Role {
+  ADMIN
+  USER
+  SUBSCRIBER
+}
+
+enum ServiceAccess {
+  GEOLOCATION
+  EXCHANGERATES
+  QRCODE
+  IMAGEPROCESSING
+  TEXTTOSPEECH
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum ProcessingAction {
+  RESIZE
+  CROP
+  CONVERT
+}
+

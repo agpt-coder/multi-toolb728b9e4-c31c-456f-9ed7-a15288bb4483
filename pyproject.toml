@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "multi-tool"
+version = "0.1.0"
+description = "The Multi-Purpose API Toolkit project was designed to offer a wide array of functionalities via a comprehensive suite of single-endpoint APIs, targeting developers who wish to streamline common tasks without integrating multiple third-party services. This all-encompassing toolkit delivers a rich set of tools, ranging from QR code generation to advanced features like text-to-speech conversion and IP geolocation, addressing the need for a versatile and efficient toolset in software development projects."
+authors = ["AutoGPT <info@agpt.co>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.11"
+bcrypt = "^3.2.0"
+fastapi = "*"
+prisma = "*"
+pydantic = "*"
+pyjwt = "^2.3.0"
+uvicorn = "*"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
